@@ -37,7 +37,7 @@ def create_map(wards_df, radius_km, city_name):
         lat, lon = row["latitude"], row["longitude"]
         name = row["ward"]
         district = row["district"]
-        ranking = row["ranking"]
+        ranking = row["final_ranking"]
 
         folium.Marker(
             location=[lat, lon],
@@ -75,7 +75,7 @@ n_nodes = st.number_input("Number of nodes to display", min_value=1, max_value=1
 radius_km = st.number_input("Distance radius (km)", min_value=0.1, max_value=10.0, value=2.0)
 
 # Filter data
-filtered_df = df[df["city"] == city].sort_values(by="ranking").head(n_nodes)
+filtered_df = df[df["city"] == city].sort_values(by="final_ranking").head(n_nodes)
 
 if filtered_df.empty:
     st.warning("No data available for the selected city.")
