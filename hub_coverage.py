@@ -35,7 +35,7 @@ def create_map(wards_df, radius_km, city_name):
     }
 
     # Create GeoDataFrame from input DataFrame
-    geometry = [Point(lon, lat) for lon, lat in zip(df['longitude'], df['latitude'])]
+    geometry = [Point(lon, lat) for lon, lat in zip(df['lon'], df['lat'])]
     gdf = gpd.GeoDataFrame(df, geometry=geometry, crs="EPSG:4326")
 
     # Project to meters for buffering
