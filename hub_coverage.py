@@ -29,10 +29,10 @@ def geodesic_circle(center_lat, center_lon, radius_km, num_points=60):
 # Utility: Draw map with polygons
 # --------------------------------------
 def create_map(wards_df, radius_km, city_name):
-    city_centers = {
-        "Hà Nội": [21.0285, 105.8542],
-        "TP. Hồ Chí Minh": [10.7769, 106.7009]
-    }
+    # city_centers = {
+    #     "Hà Nội": [21.0285, 105.8542],
+    #     "TP. Hồ Chí Minh": [10.7769, 106.7009]
+    # }
 
     # Create GeoDataFrame from input DataFrame
     geometry = [Point(lon, lat) for lon, lat in zip(df['lon'], df['lat'])]
@@ -44,7 +44,7 @@ def create_map(wards_df, radius_km, city_name):
     buffer_union = unary_union(buffers)
 
     # Load city boundary polygon (replace with real Hanoi/HCM boundaries!)
-    if city_name == "Ha Noi":
+    if city_name == "Hà Nội":
         city_poly = gpd.read_file("https://raw.githubusercontent.com/thao-nguyen-10/hub-coverage/refs/heads/main/hn.geojson").to_crs(epsg=3857)
     else:
         city_poly = gpd.read_file("https://raw.githubusercontent.com/thao-nguyen-10/hub-coverage/refs/heads/main/hcm.geojson").to_crs(epsg=3857)
@@ -55,10 +55,20 @@ def create_map(wards_df, radius_km, city_name):
     city_area = city_poly.unary_union.area
     coverage_percent = (coverage_area / city_area) * 100
     
-    map_center = city_centers.get(city_name, [16.0, 108.0])
-    m = folium.Map(location=map_center, zoom_start=12)
+    # map_center = city_centers.get(city_name, [16.0, 108.0])
+    # m = folium.Map(location=map_center, zoom_start=12)
+    m = folium.Map(location=[df['lat'].mean(), df['lon'].mean()], zoom_start=11)
 
     for _, row in wards_df.iterrows():
+        # folium.Circle(
+        #     location=(row.lat, row.lon),
+        #     radius=radius_km * 1000,
+        #     color='blue',
+        #     fill=True,
+        #     fill_opacity=0.25,
+        #     popup=row['ward']
+        # ).add_to(m)
+        
         lat, lon = row["lat"], row["lon"]
         name = row["ward"]
         district = row["district"]
@@ -115,5 +125,5 @@ if filtered_df.empty:
 else:
     # Create and display map
     ward_map, coverage = create_map(filtered_df, radius_km, city)
-    st_folium(ward_map, width=700, height=500)
     st.metric("Coverage Area (%)", f"{coverage:.2f}%")
+    st_folium(ward_map, width=700, height=500)
