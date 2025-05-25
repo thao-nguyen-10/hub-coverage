@@ -62,7 +62,7 @@ st.title("🗺️ Ward Coverage Map (Ha Noi & HCM City)")
 
 # Load data from GitHub
 try:
-    df = pd.read_csv(CSV_URL)
+    df = pd.read_csv(CSV_URL, quoting=csv.QUOTE_NONE, encoding='utf-8')
     st.success("✅ Loaded ward data from GitHub")
 except Exception as e:
     st.error(f"❌ Failed to load CSV: {e}")
