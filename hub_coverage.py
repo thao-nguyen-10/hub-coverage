@@ -34,7 +34,7 @@ def create_map(wards_df, radius_km, city_name):
     m = folium.Map(location=map_center, zoom_start=12)
 
     for _, row in wards_df.iterrows():
-        lat, lon = row["latitude"], row["longitude"]
+        lat, lon = row["lat"], row["lon"]
         name = row["ward"]
         district = row["district"]
         ranking = row["final_ranking"]
