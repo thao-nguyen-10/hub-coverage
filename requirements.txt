@@ -4,4 +4,3 @@ streamlit-folium
 geopy
 pandas
 numpy
-csv
