@@ -8,7 +8,7 @@ from streamlit_folium import st_folium
 # --------------------------------------
 # Config: raw CSV URL from your GitHub repo
 # --------------------------------------
-CSV_URL = "https://github.com/thao-nguyen-10/hub-coverage/blob/main/csv_network_lat_lon_final.csv"
+CSV_URL = "https://raw.githubusercontent.com/thao-nguyen-10/hub-coverage/refs/heads/main/csv_network_lat_lon_final.csv"
 
 # --------------------------------------
 # Utility: Generate geodesic circle (polygon)
