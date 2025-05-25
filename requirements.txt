@@ -4,3 +4,6 @@ streamlit-folium
 geopy
 pandas
 numpy
+geopandas
+shapely
+streamlit
