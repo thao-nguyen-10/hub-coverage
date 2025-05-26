@@ -139,7 +139,8 @@ else:
     
     districts = filtered_df["district"].unique()
     district_df = df[(df["city"] == city) & (df["district"].isin(districts))]
-    sale_coverage = district_df["sale"].sum() / df[df["city"] == city]["sale"].sum() * 100
+    sale_coverage = district_df["sale"].sum() / df[df["city"] == city]["sale"].sum()
+    sale_coverage = sale_coverage * 100
 
     district_coverage = len(districts)
     all_districts = df[df["city"] == city]["district"].nunique()
