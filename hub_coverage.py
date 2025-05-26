@@ -150,4 +150,4 @@ else:
     st.metric("District Coverage ", f"{district_coverage} out of {all_districts} districts")
     st_folium(ward_map, width=700, height=500)
     st.subheader("Top Selected Wards")
-    st.dataframe(filtered_df[['ward', 'district', 'final_ranking', 'sales']])
+    st.dataframe(filtered_df)
