@@ -45,9 +45,9 @@ def create_map(wards_df, radius_km, city_name):
 
     # Load city boundary polygon (replace with real Hanoi/HCM boundaries!)
     if city_name == "Hà Nội":
-        city_poly = gpd.read_file("https://raw.githubusercontent.com/thao-nguyen-10/hub-coverage/refs/heads/main/hn.geojson").to_crs(EPSG:3405) # espg=3857
+        city_poly = gpd.read_file("https://raw.githubusercontent.com/thao-nguyen-10/hub-coverage/refs/heads/main/hn.geojson").to_crs(epsg=3405)
     else:
-        city_poly = gpd.read_file("https://raw.githubusercontent.com/thao-nguyen-10/hub-coverage/refs/heads/main/hcm.geojson").to_crs(EPSG:3406) # espg=3857
+        city_poly = gpd.read_file("https://raw.githubusercontent.com/thao-nguyen-10/hub-coverage/refs/heads/main/hcm.geojson").to_crs(epsg=3406)
 
     city_poly = city_poly[city_poly.is_valid].explode(index_parts=False)
     
