@@ -45,19 +45,25 @@ def create_map(wards_df, radius_km, city_name):
 
     # Load city boundary polygon (replace with real Hanoi/HCM boundaries!)
     if city_name == "Hà Nội":
-        city_poly = gpd.read_file("https://raw.githubusercontent.com/thao-nguyen-10/hub-coverage/refs/heads/main/hn.geojson").to_crs(epsg=3857)
+        city_poly = gpd.read_file("https://raw.githubusercontent.com/thao-nguyen-10/hub-coverage/refs/heads/main/hn.geojson").to_crs(EPSG:3405) # espg=3857
     else:
-        city_poly = gpd.read_file("https://raw.githubusercontent.com/thao-nguyen-10/hub-coverage/refs/heads/main/hcm.geojson").to_crs(epsg=3857)
+        city_poly = gpd.read_file("https://raw.githubusercontent.com/thao-nguyen-10/hub-coverage/refs/heads/main/hcm.geojson").to_crs(EPSG:3406) # espg=3857
+
+    city_poly = city_poly[city_poly.is_valid].explode(index_parts=False)
     
     # Clip buffer area to city boundary
-    clipped = gpd.overlay(
-        gpd.GeoDataFrame(geometry=[buffer_union], crs=gdf_m.crs),
-        city_poly,
-        how="intersection"
-        )
+    # clipped = gpd.overlay(
+    #     gpd.GeoDataFrame(geometry=[buffer_union], crs=gdf_m.crs),
+    #     city_poly,
+    #     how="intersection"
+    #     )
     
     # Compute intersection and area
-    coverage_area = clipped.geometry.area.sum()
+    # coverage_area = clipped.geometry.area.sum()
+    # city_area = city_poly.unary_union.area
+    # coverage_percent = (coverage_area / city_area) * 100
+    intersection = buffer_union.intersection(city_poly.unary_union)
+    coverage_area = intersection.area
     city_area = city_poly.unary_union.area
     coverage_percent = (coverage_area / city_area) * 100
     
@@ -130,7 +136,17 @@ if filtered_df.empty:
 else:
     # Create and display map
     ward_map, coverage = create_map(filtered_df, radius_km, city)
-    sale_coverage = filtered_df["sale"].sum() / df[df["city"] == city]["sale"].sum()
+    
+    districts = filtered_df["district"].unique()
+    district_df = df[(df["city"] == city) & (df["district"].isin(districts))]
+    sale_coverage = district_df["sale"].sum() / df[df["city"] == city]["sale"].sum() * 100
+
+    district_coverage = len(districts)
+    all_districts = df[df["city"] == city]["district"].nunique()
+    
     st.metric("Coverage Area (%)", f"{coverage:.2f}%")
     st.metric("Coverage Sale (%)", f"{sale_coverage:.2f}%")
+    st.metric("District Coverage ", f"{district_coverage} out of {all_districts} districts")
     st_folium(ward_map, width=700, height=500)
+    st.subheader("Top Selected Wards")
+    st.dataframe(filtered_df[['ward', 'district', 'ranking', 'sales']])
