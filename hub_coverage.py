@@ -12,7 +12,7 @@ from shapely.ops import unary_union
 # --------------------------------------
 # Config: raw CSV URL from your GitHub repo
 # --------------------------------------
-CSV_URL = "https://raw.githubusercontent.com/thao-nguyen-10/hub-coverage/refs/heads/main/csv_network_lat_lon_final_v3.csv"
+CSV_URL = "https://raw.githubusercontent.com/thao-nguyen-10/hub-coverage/main/csv_network_lat_lon_final_v3.csv"
 
 # --------------------------------------
 # Utility: Generate geodesic circle (polygon)
