@@ -12,7 +12,7 @@ from shapely.ops import unary_union
 # --------------------------------------
 # Config: raw CSV URL from your GitHub repo
 # --------------------------------------
-CSV_URL = "https://raw.githubusercontent.com/thao-nguyen-10/hub-coverage/refs/heads/main/csv_network_lat_lon_final_v2.csv"
+CSV_URL = "https://raw.githubusercontent.com/thao-nguyen-10/hub-coverage/refs/heads/main/csv_network_lat_lon_final_v3.csv"
 
 # --------------------------------------
 # Utility: Generate geodesic circle (polygon)
@@ -59,6 +59,10 @@ def create_map(df, wards_df, radius_km, city_name):
     # Coverage Calculations
     ward_coverage = len(wards_within)
     all_wards = len(gdf_all)
+
+    districts_coverage = wards_within["district"].nunique()
+    all_districs = gdf_all["district"].nunique()
+    
     sale_coverage = wards_within["sale"].sum() / gdf_all["sale"].sum() * 100
 
     # Load city boundary polygon (replace with real Hanoi/HCM boundaries!)
@@ -126,7 +130,7 @@ def create_map(df, wards_df, radius_km, city_name):
             name="City Boundary"
         ).add_to(m)
 
-    return m, ward_coverage, all_wards, sale_coverage
+    return m, ward_coverage, all_wards, district_coverage, all_districts, sale_coverage
 
 # --------------------------------------
 # Streamlit UI
@@ -165,6 +169,7 @@ else:
     
     # st.metric("Coverage Area (%)", f"{coverage:.2f}%")
     st.metric("Coverage Sale (%)", f"{sale_coverage:.2f}%")
+    st.metric("District Coverage ", f"{district_coverage} out of {all_districts} districts")
     st.metric("Ward Coverage ", f"{ward_coverage} out of {all_wards} wards")
     st_folium(ward_map, width=700, height=500)
     st.subheader("Top Selected Wards")
