@@ -28,20 +28,38 @@ def geodesic_circle(center_lat, center_lon, radius_km, num_points=60):
 # --------------------------------------
 # Utility: Draw map with polygons
 # --------------------------------------
-def create_map(wards_df, radius_km, city_name):
+def create_map(df, wards_df, radius_km, city_name):
     city_centers = {
         "Hà Nội": [21.0285, 105.8542],
         "TP. Hồ Chí Minh": [10.7769, 106.7009]
     }
 
-    # Create GeoDataFrame from input DataFrame
-    geometry = [Point(lon, lat) for lon, lat in zip(df['lon'], df['lat'])]
-    gdf = gpd.GeoDataFrame(df, geometry=geometry, crs="EPSG:4326")
+    # Choose projection based on city
+    if city_name == "Hà Nội":
+        epsg_code = 3405  # VN-2000 / Hanoi
+    else:
+        epsg_code = 3406  # VN-2000 / HCM
 
+    # Create GeoDataFrame from input DataFrame
+    geometry_all = [Point(lon, lat) for lon, lat in zip(df['lon'], df['lat'])]
+    geometry_filtered = [Point(lon, lat) for lon, lat in zip(filtered_df['lon'], df['lat'])]
+    
+    gdf_all = gpd.GeoDataFrame(df, geometry=geometry_all, crs="EPSG:4326").to_crs(epsg=epsg_code)
+    gdf_filtered = gpd.GeoDataFrame(filtered_df, geometry=geometry_filtered, crs="EPSG:4326").to_crs(epsg=epsg_code)
+    
     # Project to meters for buffering
-    gdf_m = gdf.to_crs(epsg=3857)
-    buffers = gdf_m.buffer(radius_km * 1000)
+    buffers = gdf_filtered.buffer(radius_km * 1000)
     buffer_union = unary_union(buffers)
+    # gdf_m = gdf.to_crs(epsg=3857)
+
+    # Check which full-wards are inside the buffer area
+    gdf_all["within_buffer"] = gdf_all.geometry.within(buffer_union)
+    wards_within = gdf_all[gdf_all["within_buffer"]]
+
+    # Coverage Calculations
+    ward_coverage = len(wards_within)
+    all_wards = len(gdf_all)
+    sale_coverage = wards_within["sale"].sum() / gdf_all["sale"].sum() * 100
 
     # Load city boundary polygon (replace with real Hanoi/HCM boundaries!)
     if city_name == "Hà Nội":
@@ -62,10 +80,10 @@ def create_map(wards_df, radius_km, city_name):
     # coverage_area = clipped.geometry.area.sum()
     # city_area = city_poly.unary_union.area
     # coverage_percent = (coverage_area / city_area) * 100
-    intersection = buffer_union.intersection(city_poly.unary_union)
-    coverage_area = intersection.area
-    city_area = city_poly.unary_union.area
-    coverage_percent = (coverage_area / city_area) * 100
+    # intersection = buffer_union.intersection(city_poly.unary_union)
+    # coverage_area = intersection.area
+    # city_area = city_poly.unary_union.area
+    # coverage_percent = (coverage_area / city_area) * 100
     
     map_center = city_centers.get(city_name, [16.0, 108.0])
     m = folium.Map(location=map_center, zoom_start=12)
@@ -108,7 +126,7 @@ def create_map(wards_df, radius_km, city_name):
             name="City Boundary"
         ).add_to(m)
 
-    return m, coverage_percent
+    return m, ward_coverage, all_wards, sale_coverage
 
 # --------------------------------------
 # Streamlit UI
@@ -135,19 +153,19 @@ if filtered_df.empty:
     st.warning("No data available for the selected city.")
 else:
     # Create and display map
-    ward_map, coverage = create_map(filtered_df, radius_km, city)
+    ward_map, ward_coverage, all_wards, sale_coverage = create_map(df, filtered_df, radius_km, city)
     
-    districts = filtered_df["district"].unique()
-    district_df = df[(df["city"] == city) & (df["district"].isin(districts))]
-    sale_coverage = district_df["sale"].sum() / df[df["city"] == city]["sale"].sum()
-    sale_coverage = sale_coverage * 100
+    # districts = filtered_df["district"].unique()
+    # district_df = df[(df["city"] == city) & (df["district"].isin(districts))]
+    # sale_coverage = district_df["sale"].sum() / df[df["city"] == city]["sale"].sum()
+    # sale_coverage = sale_coverage * 100
 
-    district_coverage = len(districts)
-    all_districts = df[df["city"] == city]["district"].nunique()
+    # district_coverage = len(districts)
+    # all_districts = df[df["city"] == city]["district"].nunique()
     
-    st.metric("Coverage Area (%)", f"{coverage:.2f}%")
+    # st.metric("Coverage Area (%)", f"{coverage:.2f}%")
     st.metric("Coverage Sale (%)", f"{sale_coverage:.2f}%")
-    st.metric("District Coverage ", f"{district_coverage} out of {all_districts} districts")
+    st.metric("Ward Coverage ", f"{ward_coverage} out of {all_wards} wards")
     st_folium(ward_map, width=700, height=500)
     st.subheader("Top Selected Wards")
     st.dataframe(filtered_df)
