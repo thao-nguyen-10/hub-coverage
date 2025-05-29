@@ -61,7 +61,7 @@ def create_map(df, wards_df, radius_km, city_name):
     all_wards = len(gdf_all)
 
     districts_coverage = wards_within["district"].nunique()
-    all_districs = gdf_all["district"].nunique()
+    all_districts = gdf_all["district"].nunique()
     
     sale_coverage = wards_within["sale"].sum() / gdf_all["sale"].sum() * 100
 
@@ -148,7 +148,7 @@ except Exception as e:
 # Input controls
 city = st.selectbox("Select City", options=["Hà Nội", "TP. Hồ Chí Minh"])
 n_nodes = st.number_input("Number of nodes to display", min_value=1, max_value=1000, value=30)
-radius_km = st.number_input("Distance radius (km)", min_value=0.1, max_value=10.0, value=2.0)
+radius_km = st.number_input("Distance radius (km)", min_value=0.1, max_value=50.0, value=2.0)
 
 # Filter data
 filtered_df = df[df["city"] == city].sort_values(by="final_ranking").head(n_nodes)
