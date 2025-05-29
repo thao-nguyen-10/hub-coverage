@@ -59,9 +59,6 @@ def create_map(df, wards_df, radius_km, city_name):
     # Coverage Calculations
     ward_coverage = len(wards_within)
     all_wards = len(gdf_all)
-
-    districts_coverage = wards_within["district"].nunique()
-    all_districts = gdf_all["district"].nunique()
     
     sale_coverage = wards_within["sale"].sum() / gdf_all["sale"].sum() * 100
 
@@ -72,22 +69,6 @@ def create_map(df, wards_df, radius_km, city_name):
         city_poly = gpd.read_file("https://raw.githubusercontent.com/thao-nguyen-10/hub-coverage/refs/heads/main/hcm.geojson").to_crs(epsg=3406)
 
     city_poly = city_poly[city_poly.is_valid].explode(index_parts=False)
-    
-    # Clip buffer area to city boundary
-    # clipped = gpd.overlay(
-    #     gpd.GeoDataFrame(geometry=[buffer_union], crs=gdf_m.crs),
-    #     city_poly,
-    #     how="intersection"
-    #     )
-    
-    # Compute intersection and area
-    # coverage_area = clipped.geometry.area.sum()
-    # city_area = city_poly.unary_union.area
-    # coverage_percent = (coverage_area / city_area) * 100
-    # intersection = buffer_union.intersection(city_poly.unary_union)
-    # coverage_area = intersection.area
-    # city_area = city_poly.unary_union.area
-    # coverage_percent = (coverage_area / city_area) * 100
     
     map_center = city_centers.get(city_name, [16.0, 108.0])
     m = folium.Map(location=map_center, zoom_start=12)
@@ -130,7 +111,7 @@ def create_map(df, wards_df, radius_km, city_name):
             name="City Boundary"
         ).add_to(m)
 
-    return m, ward_coverage, all_wards, districts_coverage, all_districts, sale_coverage
+    return m, ward_coverage, all_wards, sale_coverage
 
 # --------------------------------------
 # Streamlit UI
@@ -151,23 +132,22 @@ n_nodes = st.number_input("Number of nodes to display", min_value=1, max_value=1
 radius_km = st.number_input("Distance radius (km)", min_value=0.1, max_value=50.0, value=2.0)
 
 # Filter data
+df_city = df[df["city"] == city]
 filtered_df = df[df["city"] == city].sort_values(by="final_ranking").head(n_nodes)
 
 if filtered_df.empty:
     st.warning("No data available for the selected city.")
 else:
     # Create and display map
-    ward_map, ward_coverage, all_wards, districts_coverage, all_districts, sale_coverage = create_map(df, filtered_df, radius_km, city)
+    ward_map, ward_coverage, all_wards, sale_coverage = create_map(df_city, filtered_df, radius_km, city)
     
-    # districts = filtered_df["district"].unique()
     # district_df = df[(df["city"] == city) & (df["district"].isin(districts))]
     # sale_coverage = district_df["sale"].sum() / df[df["city"] == city]["sale"].sum()
     # sale_coverage = sale_coverage * 100
 
-    # district_coverage = len(districts)
-    # all_districts = df[df["city"] == city]["district"].nunique()
+    district_coverage = filtered_df["district"].nunique()
+    all_districts = df[df["city"] == city]["district"].nunique()
     
-    # st.metric("Coverage Area (%)", f"{coverage:.2f}%")
     st.metric("Coverage Sale (%)", f"{sale_coverage:.2f}%")
     st.metric("District Coverage ", f"{districts_coverage} out of {all_districts} districts")
     st.metric("Ward Coverage ", f"{ward_coverage} out of {all_wards} wards")
