@@ -145,11 +145,11 @@ else:
     # sale_coverage = district_df["sale"].sum() / df[df["city"] == city]["sale"].sum()
     # sale_coverage = sale_coverage * 100
 
-    district_coverage = filtered_df["district"].nunique()
+    districts_coverage = filtered_df["district"].nunique()
     all_districts = df[df["city"] == city]["district"].nunique()
     
     st.metric("Coverage Sale (%)", f"{sale_coverage:.2f}%")
-    st.metric("District Coverage ", f"{district_coverage} out of {all_districts} districts")
+    st.metric("District Coverage ", f"{districts_coverage} out of {all_districts} districts")
     st.metric("Ward Coverage ", f"{ward_coverage} out of {all_wards} wards")
     st_folium(ward_map, width=700, height=500)
     st.subheader("Top Selected Wards")
