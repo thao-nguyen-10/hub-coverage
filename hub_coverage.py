@@ -130,7 +130,7 @@ def create_map(df, wards_df, radius_km, city_name):
             name="City Boundary"
         ).add_to(m)
 
-    return m, ward_coverage, all_wards, district_coverage, all_districts, sale_coverage
+    return m, ward_coverage, all_wards, districts_coverage, all_districts, sale_coverage
 
 # --------------------------------------
 # Streamlit UI
@@ -157,7 +157,7 @@ if filtered_df.empty:
     st.warning("No data available for the selected city.")
 else:
     # Create and display map
-    ward_map, ward_coverage, all_wards, sale_coverage = create_map(df, filtered_df, radius_km, city)
+    ward_map, ward_coverage, all_wards, districts_coverage, all_districts, sale_coverage = create_map(df, filtered_df, radius_km, city)
     
     # districts = filtered_df["district"].unique()
     # district_df = df[(df["city"] == city) & (df["district"].isin(districts))]
@@ -169,7 +169,7 @@ else:
     
     # st.metric("Coverage Area (%)", f"{coverage:.2f}%")
     st.metric("Coverage Sale (%)", f"{sale_coverage:.2f}%")
-    st.metric("District Coverage ", f"{district_coverage} out of {all_districts} districts")
+    st.metric("District Coverage ", f"{districts_coverage} out of {all_districts} districts")
     st.metric("Ward Coverage ", f"{ward_coverage} out of {all_wards} wards")
     st_folium(ward_map, width=700, height=500)
     st.subheader("Top Selected Wards")
